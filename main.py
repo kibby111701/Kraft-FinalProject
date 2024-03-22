@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import argrelextrema
+from fractions import Fraction
 
 
 mpPose = mp.solutions.pose
@@ -37,9 +38,8 @@ for landmark in excluded_landmarks:
 vidfile = "videos/swing1.MOV"
 vid = cv.VideoCapture(vidfile)
 
-wrist_x = []
-wrist_y = []
-time = []
+lwrist_x = []
+lwrist_y = []
 frames = []
 i = 0
 while True:
@@ -60,9 +60,9 @@ while True:
 
         keypoints = [0, 11, 12, 15, 16, 23, 24, 25, 26, 27, 28]
 
-        wrist_x.append(results.pose_landmarks.landmark[15].x)
-        wrist_y.append(results.pose_landmarks.landmark[15].y)
-        time.append(i)
+        lwrist_x.append(results.pose_landmarks.landmark[15].x)
+        lwrist_y.append(results.pose_landmarks.landmark[15].y)
+        
         
     #cv.imshow("Video", frame)
     cv.imshow('outline', black)
@@ -71,14 +71,43 @@ while True:
         break
 
     frames.append(frame)
-    i+=1
 
 
-grads = np.gradient(wrist_y)
-second_grads = np.gradient(grads)
+y_mins = argrelextrema(np.array(lwrist_y), np.less)
+y_maxes = argrelextrema(np.array(lwrist_y), np.greater)
 
-# mins = argrelextrema(np.array(wrist_y), np.less)
-# maxes = argrelextrema(np.array(wrist_y), np.greater)
+prev = None
+# for ex in y_mins[0]:
+#     show = False
+#     if prev:
+#         print(abs(prev - lwrist_y[ex]))
+#         if abs(prev-lwrist_y[ex]) > 0.02:
+#             show = True
+#     else:
+#         show = True
+#     if show:
+#         cv.imshow("Minimums", frames[ex])
+#         cv.waitKey(0)
+#     prev = lwrist_y[ex]
+
+# prev = None
+# for ex in y_maxes[0]:
+#     show = False
+#     if prev:
+#         print(abs(prev - lwrist_y[ex]))
+#         if abs(prev-lwrist_y[ex]) > 0.02:
+#             show = True
+#     else:
+#         show = True
+#     show = True
+#     if show:
+#         cv.imshow("Maximums", frames[ex])
+#         cv.waitKey(0)
+#     prev = lwrist_y[ex]
+
+
+x_mins = argrelextrema(np.array(lwrist_x), np.less)
+x_maxes = argrelextrema(np.array(lwrist_x), np.greater)
 
 # for ex in mins[0]:
 #     cv.imshow("Minimums", frames[ex])
@@ -89,14 +118,61 @@ second_grads = np.gradient(grads)
 #     cv.waitKey(0)
 
 
-mins = argrelextrema(np.array(wrist_x), np.less)
-maxes = argrelextrema(np.array(wrist_x), np.greater)
+def identify_phases(lwrist_y, lwrist_x, closeness_thresh = 0.02):
+    """Returns phases of swings as frame numbers from the video"""
+    y_mins = argrelextrema(np.array(lwrist_y), np.less)
+    y_maxes = argrelextrema(np.array(lwrist_y), np.greater)
 
-for ex in mins[0]:
-    cv.imshow("Minimums", frames[ex])
-    cv.waitKey(0)
+    candidates = []
+    prev = None
+    for ex in y_mins[0]:
+        if prev:
+            if abs(prev-lwrist_y[ex]) > closeness_thresh:
+                candidates.append(ex)
+        else:
+            candidates.append(ex)
+        prev = lwrist_y[ex]
+    
+    address, backswing, follow, finish = [candidates[i] for i in range(4)]
 
-for ex in maxes[0]:
-    cv.imshow('Maximums', frames[ex])
-    cv.waitKey(0)
+    impact_candidates = []
+    for ex in y_maxes[0]:
+        if ex > backswing and ex < follow:
+            impact_candidates.append(ex)
+    impact = np.max(impact_candidates)
 
+    return address, backswing, follow, finish, impact
+    
+
+def find_swing_start(address, lwrist_x, closeness_thresh=1e-3):
+    prev = None
+    for i in range(address, address+20):
+        if prev:
+            if abs(prev - lwrist_x[i]) > closeness_thresh:
+                return i
+            
+        
+        prev = lwrist_x[i]
+    return address
+
+
+def calculate_tempo(start, backswing, impact):
+    tempo = (backswing - start) / (impact - backswing)
+    tempo = Fraction(tempo).limit_denominator(10)
+    return tempo
+
+
+address, backswing, follow, finish, impact = identify_phases(lwrist_y,lwrist_x)
+cv.imshow('Address', frames[address])
+cv.waitKey(0)
+cv.imshow('Backswing', frames[backswing])
+cv.waitKey(0)
+cv.imshow('Impact', frames[impact])
+cv.waitKey(0)
+cv.imshow('Followthrough', frames[follow])
+cv.waitKey(0)
+cv.imshow('Finish', frames[finish])
+cv.waitKey(0)
+start = find_swing_start(address, lwrist_x, 0.02)
+tempo = calculate_tempo(start, backswing, impact)
+print("Swing tempo (ratio of backswing time to impact time): " + str(tempo).replace('/', ':'))
