@@ -4,10 +4,7 @@ from mediapipe.python.solutions.drawing_utils import DrawingSpec
 import cv2 as cv
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-from scipy.signal import argrelextrema
-from fractions import Fraction
-
+import metrics
 
 mpPose = mp.solutions.pose
 pose = mpPose.Pose()
@@ -40,6 +37,7 @@ vid = cv.VideoCapture(vidfile)
 
 lwrist_x = []
 lwrist_y = []
+head_y = []
 frames = []
 i = 0
 while True:
@@ -62,6 +60,7 @@ while True:
 
         lwrist_x.append(results.pose_landmarks.landmark[15].x)
         lwrist_y.append(results.pose_landmarks.landmark[15].y)
+        head_y.append(results.pose_landmarks.landmark[0].y)
         
         
     #cv.imshow("Video", frame)
@@ -73,96 +72,8 @@ while True:
     frames.append(frame)
 
 
-y_mins = argrelextrema(np.array(lwrist_y), np.less)
-y_maxes = argrelextrema(np.array(lwrist_y), np.greater)
 
-prev = None
-# for ex in y_mins[0]:
-#     show = False
-#     if prev:
-#         print(abs(prev - lwrist_y[ex]))
-#         if abs(prev-lwrist_y[ex]) > 0.02:
-#             show = True
-#     else:
-#         show = True
-#     if show:
-#         cv.imshow("Minimums", frames[ex])
-#         cv.waitKey(0)
-#     prev = lwrist_y[ex]
-
-# prev = None
-# for ex in y_maxes[0]:
-#     show = False
-#     if prev:
-#         print(abs(prev - lwrist_y[ex]))
-#         if abs(prev-lwrist_y[ex]) > 0.02:
-#             show = True
-#     else:
-#         show = True
-#     show = True
-#     if show:
-#         cv.imshow("Maximums", frames[ex])
-#         cv.waitKey(0)
-#     prev = lwrist_y[ex]
-
-
-x_mins = argrelextrema(np.array(lwrist_x), np.less)
-x_maxes = argrelextrema(np.array(lwrist_x), np.greater)
-
-# for ex in mins[0]:
-#     cv.imshow("Minimums", frames[ex])
-#     cv.waitKey(0)
-
-# for ex in maxes[0]:
-#     cv.imshow('Maximums', frames[ex])
-#     cv.waitKey(0)
-
-
-def identify_phases(lwrist_y, lwrist_x, closeness_thresh = 0.02):
-    """Returns phases of swings as frame numbers from the video"""
-    y_mins = argrelextrema(np.array(lwrist_y), np.less)
-    y_maxes = argrelextrema(np.array(lwrist_y), np.greater)
-
-    candidates = []
-    prev = None
-    for ex in y_mins[0]:
-        if prev:
-            if abs(prev-lwrist_y[ex]) > closeness_thresh:
-                candidates.append(ex)
-        else:
-            candidates.append(ex)
-        prev = lwrist_y[ex]
-    
-    address, backswing, follow, finish = [candidates[i] for i in range(4)]
-
-    impact_candidates = []
-    for ex in y_maxes[0]:
-        if ex > backswing and ex < follow:
-            impact_candidates.append(ex)
-    impact = np.max(impact_candidates)
-
-    return address, backswing, follow, finish, impact
-    
-
-def find_swing_start(address, lwrist_x, closeness_thresh=1e-3):
-    prev = None
-    for i in range(address, address+20):
-        if prev:
-            if abs(prev - lwrist_x[i]) > closeness_thresh:
-                return i
-            
-        
-        prev = lwrist_x[i]
-    return address
-
-
-def calculate_tempo(start, backswing, impact):
-    tempo = (backswing - start) / (impact - backswing)
-    tempo = Fraction(tempo).limit_denominator(10)
-    return tempo
-
-
-address, backswing, follow, finish, impact = identify_phases(lwrist_y,lwrist_x)
+address, backswing, follow, finish, impact = metrics.identify_phases(lwrist_y,lwrist_x)
 cv.imshow('Address', frames[address])
 cv.waitKey(0)
 cv.imshow('Backswing', frames[backswing])
@@ -173,6 +84,7 @@ cv.imshow('Followthrough', frames[follow])
 cv.waitKey(0)
 cv.imshow('Finish', frames[finish])
 cv.waitKey(0)
-start = find_swing_start(address, lwrist_x, 0.02)
-tempo = calculate_tempo(start, backswing, impact)
-print("Swing tempo (ratio of backswing time to impact time): " + str(tempo).replace('/', ':'))
+start = metrics.find_swing_start(address, lwrist_x, 0.01)
+tempo = metrics.calculate_tempo(start, backswing, impact)
+print("Swing tempo (ratio of backswing frames to impact frames): " + tempo)
+print("Head movement (as a fraction of image size): " + str(metrics.head_movement_total(head_y, start, impact)))
