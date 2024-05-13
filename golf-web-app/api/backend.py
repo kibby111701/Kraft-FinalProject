@@ -35,10 +35,8 @@ def upload_file():
         f = request.files['file']
         filename = secure_filename(f.filename)
         if allowedFile(filename):
-            print(filename)
             savepath = UPLOAD_FOLDER+'base.'+get_extn(f.filename)
             f.save(savepath)
-            sleep(2)
             return {'filename': filename, 'status': 'success'}
         else:
             return {'status': 'failed'}

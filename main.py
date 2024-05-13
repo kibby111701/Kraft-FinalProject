@@ -38,6 +38,24 @@ vid = cv.VideoCapture(vidfile)
 lwrist_x = []
 lwrist_y = []
 head_y = []
+
+y_coords = {}
+x_coords = {}
+
+body_parts = {
+    'head': 0,
+    'lshoulder': 11,
+    'rshoulder': 12,
+    'lwrist': 15,
+    'rwrist': 16,
+    'lhip': 23,
+    'rhip': 24,
+    'lknee': 25,
+    'rknee': 26,
+    'lfoot': 27,
+    'rfoot': 28
+}
+
 frames = []
 i = 0
 while True:
@@ -56,11 +74,19 @@ while True:
         mpDraw.draw_landmarks(black, results.pose_landmarks, connections=custom_connections, landmark_drawing_spec=custom_style)
         mpDraw.draw_landmarks(frame, results.pose_landmarks, landmark_drawing_spec=custom_style)
 
-        keypoints = [0, 11, 12, 15, 16, 23, 24, 25, 26, 27, 28]
+        for part in body_parts.keys():
+            keypoint = body_parts[part]
+            if not y_coords.get(part):
+                y_coords[part] = []
+            y_coords[part].append(results.pose_landmarks.landmark[keypoint].y)
 
-        lwrist_x.append(results.pose_landmarks.landmark[15].x)
-        lwrist_y.append(results.pose_landmarks.landmark[15].y)
-        head_y.append(results.pose_landmarks.landmark[0].y)
+            if not x_coords.get(part):
+                x_coords[part] = []
+            x_coords[part].append(results.pose_landmarks.landmark[keypoint].x)
+
+        #lwrist_x.append(results.pose_landmarks.landmark[15].x)
+        #lwrist_y.append(results.pose_landmarks.landmark[15].y)
+        #head_y.append(results.pose_landmarks.landmark[0].y)
         
         
     #cv.imshow("Video", frame)
@@ -71,7 +97,13 @@ while True:
 
     frames.append(frame)
 
-
+lwrist_x = x_coords['lwrist']
+lwrist_y = y_coords['lwrist']
+head_y = y_coords['head']
+lhip_x = x_coords['lhip']
+rhip_x = x_coords['rhip']
+lshoulder_y = y_coords['lshoulder']
+rshoulder_y = y_coords['rshoulder']
 
 address, backswing, follow, finish, impact = metrics.identify_phases(lwrist_y,lwrist_x)
 cv.imshow('Address', frames[address])
@@ -87,4 +119,8 @@ cv.waitKey(0)
 start = metrics.find_swing_start(address, lwrist_x, 0.01)
 tempo = metrics.calculate_tempo(start, backswing, impact)
 print("Swing tempo (ratio of backswing frames to impact frames): " + tempo)
+print("Backswing head movement: " + str(metrics.head_movement_up(head_y, start, backswing)))
+print("Downswing head movement: " + str(metrics.head_movement_down(head_y, backswing, impact)))
 print("Head movement (as a fraction of image size): " + str(metrics.head_movement_total(head_y, start, impact)))
+print("Hip shift: " + str(metrics.hip_shift(lhip_x, rhip_x, start, impact)))
+print("Shoulder dip/lift: " + str(metrics.shoulder_dip(lshoulder_y, rshoulder_y, impact)))

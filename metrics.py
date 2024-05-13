@@ -1,3 +1,4 @@
+import math
 import numpy as np
 from scipy.signal import argrelextrema
 
@@ -47,5 +48,14 @@ def calculate_tempo(start, backswing, impact):
 def head_movement_up(head_y, start, backswing):
     return head_y[start] - head_y[backswing]
 
+def head_movement_down(head_y, backswing, impact):
+    return head_y[backswing] - head_y[impact]
+
 def head_movement_total(head_y, start, impact):
     return head_y[start] - head_y[impact]
+
+def hip_shift(lhip_x, rhip_x, start, impact):
+    return ((lhip_x[impact] - lhip_x[start]) + (rhip_x[impact] - rhip_x[start])) / 2.0
+
+def shoulder_dip(lshoulder_y, rshoulder_y, impact):
+    return lshoulder_y[impact] - rshoulder_y[impact]
