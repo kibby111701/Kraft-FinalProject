@@ -83,10 +83,6 @@ while True:
             if not x_coords.get(part):
                 x_coords[part] = []
             x_coords[part].append(results.pose_landmarks.landmark[keypoint].x)
-
-        #lwrist_x.append(results.pose_landmarks.landmark[15].x)
-        #lwrist_y.append(results.pose_landmarks.landmark[15].y)
-        #head_y.append(results.pose_landmarks.landmark[0].y)
         
         
     #cv.imshow("Video", frame)
@@ -118,9 +114,9 @@ cv.imshow('Finish', frames[finish])
 cv.waitKey(0)
 start = metrics.find_swing_start(address, lwrist_x, 0.01)
 tempo = metrics.calculate_tempo(start, backswing, impact)
-print("Swing tempo (ratio of backswing frames to impact frames): " + tempo)
-print("Backswing head movement: " + str(metrics.head_movement_up(head_y, start, backswing)))
-print("Downswing head movement: " + str(metrics.head_movement_down(head_y, backswing, impact)))
-print("Head movement (as a fraction of image size): " + str(metrics.head_movement_total(head_y, start, impact)))
-print("Hip shift: " + str(metrics.hip_shift(lhip_x, rhip_x, start, impact)))
-print("Shoulder dip/lift: " + str(metrics.shoulder_dip(lshoulder_y, rshoulder_y, impact)))
+print("Swing tempo (ratio of backswing frames to impact frames)" + tempo)
+print("Backswing head movement" + str(metrics.head_movement_up(head_y, start, backswing)))
+print("Downswing head movement" + str(metrics.head_movement_down(head_y, backswing, impact)))
+print("Head movement (as a fraction of image size)" + str(metrics.head_movement_total(head_y, start, impact)))
+print("Hip shift" + str(metrics.hip_shift(lhip_x, rhip_x, start, impact)))
+print("Shoulder dip/lift" + str(metrics.shoulder_dip(lshoulder_y, rshoulder_y, impact)))

@@ -74,8 +74,10 @@ class Video extends React.Component {
 
 function App() {
 
-  const [ videoPath, setVideoPath ] = useState('');
-
+  const [ videoPath, setVideoPath ] = useState('/static/videos/base.mov');
+  const [ loading, setLoading ] = useState(false);
+  const [ statistics, setStatistics ] = useState(null);
+  const [ error, setError ] = useState(null);
 
   const handleUpload = async (e) => {
     e.preventDefault()
@@ -100,12 +102,56 @@ function App() {
 
   }
 
+  const generateStats = async (e) => {
+    setLoading(true);
+    setError(null);
+
+    try{
+      const response = await fetch('/generate', {mehtod: 'GET',});
+      
+      const resdata = await response.json();
+      console.log(resdata.status);
+      console.log(resdata.status == 'success');
+      if (resdata.status === 'success'){
+        console.log(resdata.data);
+        setStatistics(resdata.data);
+      }
+      else {
+        setError(resdata.error);
+      }
+
+    } catch (err) {
+      setError('Error fetching stats');
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="App">
       <header className="App-header">
         <h1>GolfTrace</h1>
         <input type="file" onChange={handleUpload}/>
         {videoPath && <Video videoPath={videoPath}/>}
+        <br></br>
+        <div>
+          <button onClick={generateStats} disabled={!videoPath} className='button'>Generate Stats!</button>
+          {loading && <p>Loading...</p>}
+          {error && <p>{error}</p>}
+          {statistics && (
+            <div>
+              <h2>Statistics:</h2>
+              <ul>
+                {Object.entries(statistics).map(([key, value]) => (
+                  <li key={key}>
+                    <strong>{key}:</strong> {value}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+        
       </header>
       
     </div>
