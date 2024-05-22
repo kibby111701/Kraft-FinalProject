@@ -127,6 +127,10 @@ function App() {
     }
   }
 
+  const buttonDisabled = () => {
+    return !videoPath || loading;
+  }
+
   return (
     <div className="App">
       <header className="App-header">
@@ -135,7 +139,7 @@ function App() {
         {videoPath && <Video videoPath={videoPath}/>}
         <br></br>
         <div>
-          <button onClick={generateStats} disabled={!videoPath} className='button'>Generate Stats!</button>
+          <button onClick={generateStats} disabled={buttonDisabled()} className='button'>Generate Stats!</button>
           {loading && <p>Loading...</p>}
           {error && <p>{error}</p>}
           {statistics && (

@@ -100,6 +100,7 @@ lhip_x = x_coords['lhip']
 rhip_x = x_coords['rhip']
 lshoulder_y = y_coords['lshoulder']
 rshoulder_y = y_coords['rshoulder']
+rfoot_y = y_coords['rfoot']
 
 address, backswing, follow, finish, impact = metrics.identify_phases(lwrist_y,lwrist_x)
 cv.imshow('Address', frames[address])
@@ -113,10 +114,11 @@ cv.waitKey(0)
 cv.imshow('Finish', frames[finish])
 cv.waitKey(0)
 start = metrics.find_swing_start(address, lwrist_x, 0.01)
+height = metrics.get_height(start, head_y, rfoot_y)
 tempo = metrics.calculate_tempo(start, backswing, impact)
-print("Swing tempo (ratio of backswing frames to impact frames)" + tempo)
-print("Backswing head movement" + str(metrics.head_movement_up(head_y, start, backswing)))
-print("Downswing head movement" + str(metrics.head_movement_down(head_y, backswing, impact)))
-print("Head movement (as a fraction of image size)" + str(metrics.head_movement_total(head_y, start, impact)))
-print("Hip shift" + str(metrics.hip_shift(lhip_x, rhip_x, start, impact)))
-print("Shoulder dip/lift" + str(metrics.shoulder_dip(lshoulder_y, rshoulder_y, impact)))
+print("Swing tempo (ratio of backswing frames to impact frames): " + tempo)
+print("Backswing head movement: " + str(metrics.head_movement_up(head_y, start, backswing, height=height)))
+print("Downswing head movement: " + str(metrics.head_movement_down(head_y, backswing, impact, height=height)))
+print("Head movement (as a fraction of image size): " + str(metrics.head_movement_total(head_y, start, impact, height=height)))
+print("Hip shift: " + str(metrics.hip_shift(lhip_x, rhip_x, start, impact, height=height)))
+print("Shoulder dip/lift: " + str(metrics.shoulder_dip(lshoulder_y, rshoulder_y, impact, height=height)))

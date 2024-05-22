@@ -17,7 +17,17 @@ def identify_phases(lwrist_y, lwrist_x, closeness_thresh = 0.02):
             candidates.append(ex)
         prev = lwrist_y[ex]
     
-    address, backswing, follow, finish = [candidates[i] for i in range(4)]
+    address = 0
+    finish = -1
+    if len(candidates) == 4:
+        print('good')
+        address, backswing, follow, finish = [candidates[i] for i in range(4)]
+    elif len(candidates) == 3:
+        print('mid')
+        address, backswing, follow = [candidates[i] for i in range(3)]
+    else:
+        print('bad')
+        backswing, follow = [candidates[i] for i in range(2)]
 
     impact_candidates = []
     for ex in y_maxes[0]:
@@ -45,17 +55,38 @@ def calculate_tempo(start, backswing, impact):
     tempo = str(tempo) + ':1'
     return tempo
 
-def head_movement_up(head_y, start, backswing):
-    return head_y[start] - head_y[backswing]
+def get_height(start, head_y, foot_y):
+    return foot_y[start] - head_y[start]
 
-def head_movement_down(head_y, backswing, impact):
-    return head_y[backswing] - head_y[impact]
+def percentify(measure, height):
+    return '{:.2f}%'.format((measure / height) * 100)
 
-def head_movement_total(head_y, start, impact):
-    return head_y[start] - head_y[impact]
+def head_movement_up(head_y, start, backswing, height=None):
+    measure = head_y[start] - head_y[backswing]
+    if not height:
+        return measure
+    return percentify(measure, height)
 
-def hip_shift(lhip_x, rhip_x, start, impact):
-    return ((lhip_x[impact] - lhip_x[start]) + (rhip_x[impact] - rhip_x[start])) / 2.0
+def head_movement_down(head_y, backswing, impact, height=None):
+    measure = head_y[backswing] - head_y[impact]
+    if not height:
+        return measure
+    return percentify(measure, height)
 
-def shoulder_dip(lshoulder_y, rshoulder_y, impact):
-    return lshoulder_y[impact] - rshoulder_y[impact]
+def head_movement_total(head_y, start, impact, height=None):
+    measure = head_y[start] - head_y[impact]
+    if not height:
+        return measure
+    return percentify(measure, height)
+
+def hip_shift(lhip_x, rhip_x, start, impact, height=None):
+    measure = ((lhip_x[impact] - lhip_x[start]) + (rhip_x[impact] - rhip_x[start])) / 2.0
+    if not height:
+        return measure
+    return percentify(measure, height)
+
+def shoulder_dip(lshoulder_y, rshoulder_y, impact, height=None):
+    measure = lshoulder_y[impact] - rshoulder_y[impact]
+    if not height:
+        return measure
+    return percentify(measure, height)
