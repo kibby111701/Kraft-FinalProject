@@ -144,12 +144,12 @@ def generate_statistics():
     tempo = metrics.calculate_tempo(start, backswing, impact)
     height = metrics.get_height(start, head_y, rfoot_y)   
     stats = {}
-    stats["Swing tempo (ratio of backswing frames to impact frames): "] = tempo
-    stats["Backswing head movement: "] = str(metrics.head_movement_up(head_y, start, backswing, height=height))
-    stats["Downswing head movement: "] = str(metrics.head_movement_down(head_y, backswing, impact, height=height))
-    stats["Head movement (as a fraction of image size): "] = str(metrics.head_movement_total(head_y, start, impact, height=height))
-    stats["Hip shift: "] = str(metrics.hip_shift(lhip_x, rhip_x, start, impact, height=height))
-    stats["Shoulder dip/lift: "] = str(metrics.shoulder_dip(lshoulder_y, rshoulder_y, impact, height=height))
+    stats["Swing tempo (ratio of backswing frames to impact frames)"] = tempo
+    stats["Backswing head movement"] = str(metrics.head_movement_up(head_y, start, backswing, height=height))
+    stats["Downswing head movement"] = str(metrics.head_movement_down(head_y, backswing, impact, height=height))
+    stats["Head movement"] = str(metrics.head_movement_total(head_y, start, impact, height=height))
+    stats["Hip shift"] = str(metrics.hip_shift(lhip_x, rhip_x, start, impact, height=height))
+    stats["Shoulder dip/lift"] = str(metrics.shoulder_dip(lshoulder_y, rshoulder_y, impact, height=height))
     resp = {"status": 'success', 'data': stats}
     return resp
 
