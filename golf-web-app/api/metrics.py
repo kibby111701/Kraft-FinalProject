@@ -90,3 +90,15 @@ def shoulder_dip(lshoulder_y, rshoulder_y, impact, height=None):
     if not height:
         return measure
     return percentify(measure, height)
+
+def back_hip_rotation(lhip_x, rhip_x, start, backswing):
+    hipd_start = abs(lhip_x[start] - rhip_x[start])
+    hipd_back = abs(lhip_x[backswing] - rhip_x[backswing])
+    degree = math.degrees(np.arccos(hipd_back/hipd_start))
+    return '{:.2f} degrees'.format(degree)
+
+def thru_hip_rotation(lhip_x, rhip_x, impact, follow):
+    hipd_impact = abs(lhip_x[impact] - rhip_x[impact])
+    hipd_follow = abs(lhip_x[follow] - rhip_x[follow])
+    degree = math.degrees(np.arccos(hipd_follow/hipd_impact))
+    return '{:.2f} degrees'.format(degree)

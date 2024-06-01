@@ -147,9 +147,11 @@ def generate_statistics():
     stats["Swing tempo (ratio of backswing frames to impact frames)"] = tempo
     stats["Backswing head movement"] = str(metrics.head_movement_up(head_y, start, backswing, height=height))
     stats["Downswing head movement"] = str(metrics.head_movement_down(head_y, backswing, impact, height=height))
-    stats["Head movement"] = str(metrics.head_movement_total(head_y, start, impact, height=height))
+    stats["Overall Head movement"] = str(metrics.head_movement_total(head_y, start, impact, height=height))
     stats["Hip shift"] = str(metrics.hip_shift(lhip_x, rhip_x, start, impact, height=height))
     stats["Shoulder dip/lift"] = str(metrics.shoulder_dip(lshoulder_y, rshoulder_y, impact, height=height))
+    stats["Backswing hip rotation"] = str(metrics.back_hip_rotation(lhip_x, rhip_x, start, backswing))
+    stats["Followthrough hip rotation"] = str(metrics.thru_hip_rotation(lhip_x, rhip_x, impact, follow))
     resp = {"status": 'success', 'data': stats}
     return resp
 
