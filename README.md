@@ -13,3 +13,9 @@ These results can also be accessed through this project's web app, which accepts
 
 ### Usage
 - To run the basic Python script: `python3 main.py`
+  - Replace "swing1.MOV" with another video file by the same name to test the script on a different swing
+ - To run the web app:
+     - `flask run` from golf-web-app/api
+     - `npm start` from golf-web-app/src
+     - Upload your file with the file selector and click "Generate"
+
