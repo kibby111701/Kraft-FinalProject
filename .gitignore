@@ -1,6 +1,6 @@
 .venv
 .DS_store
 __pycache__
-videos
+swingvideos
 golfdb
 node_modules
