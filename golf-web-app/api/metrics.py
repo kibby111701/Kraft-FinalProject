@@ -20,13 +20,10 @@ def identify_phases(lwrist_y, lwrist_x, closeness_thresh = 0.02):
     address = 0
     finish = -1
     if len(candidates) == 4:
-        print('good')
         address, backswing, follow, finish = [candidates[i] for i in range(4)]
     elif len(candidates) == 3:
-        print('mid')
         address, backswing, follow = [candidates[i] for i in range(3)]
     else:
-        print('bad')
         backswing, follow = [candidates[i] for i in range(2)]
 
     impact_candidates = []

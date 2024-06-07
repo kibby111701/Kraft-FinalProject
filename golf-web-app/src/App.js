@@ -1,12 +1,9 @@
 import './App.css';
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 import ReactPlayer from 'react-player'
 
 class Video extends React.Component {
 
-  constructor(props) {
-    super(props);
-  }
 
   render () {
       return (
@@ -15,7 +12,7 @@ class Video extends React.Component {
           className='react-player fixed-bottom'
           url={this.props.videoPath}
           width='100%'
-          height='100%'
+          height='70%'
           controls = {true}
 
           />
@@ -111,7 +108,7 @@ function App() {
       
       const resdata = await response.json();
       console.log(resdata.status);
-      console.log(resdata.status == 'success');
+      console.log(resdata.status === 'success');
       if (resdata.status === 'success'){
         console.log(resdata.data);
         setStatistics(resdata.data);
@@ -132,32 +129,33 @@ function App() {
   }
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <h1>GolfTrace</h1>
-        <input type="file" onChange={handleUpload}/>
-        {videoPath && <Video videoPath={videoPath}/>}
-        <br></br>
-        <div>
-          <button onClick={generateStats} disabled={buttonDisabled()} className='button'>Generate Stats!</button>
-          {loading && <p>Loading...</p>}
-          {error && <p>{error}</p>}
-          {statistics && (
-            <div>
-              <h2>Statistics:</h2>
-              <ul>
-                {Object.entries(statistics).map(([key, value]) => (
-                  <li key={key}>
-                    <strong>{key}:</strong> {value}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-        
-      </header>
-      
+    <div className='container'>
+      <div className="App">
+        <header className="App-header">
+          <h1>GolfTrace</h1>
+          <input type="file" onChange={handleUpload}/>
+          {videoPath && <Video videoPath={videoPath}/>}
+          <br></br>
+          <div>
+            <button onClick={generateStats} disabled={buttonDisabled()} className='button'>Generate Stats!</button>
+            {loading && <p>Loading...</p>}
+            {error && <p>{error}</p>}
+            {statistics && (
+              <div>
+                <h2>Statistics:</h2>
+                <ul>
+                  {Object.entries(statistics).map(([key, value]) => (
+                    <li key={key}>
+                      <strong>{key}:</strong> {value}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+          
+        </header>
+      </div>  
     </div>
   );
 }

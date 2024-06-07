@@ -76,7 +76,6 @@ def test():
 @app.route('/upload', methods=['POST'])
 def upload_file():
     try:
-        print('here')
         f = request.files['file']
         filename = secure_filename(f.filename)
         if allowedFile(filename):
